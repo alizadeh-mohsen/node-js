@@ -10,16 +10,16 @@ app.set('views', './views');
 app.use(express.json());
 app.use('/api/movies', movies);
 
-
+app.get('/', (req, res) => {
+    res.render('homepage');
+});
 app.listen(3000, () => {
     console.log('listening to port 3000....');
 });
 
-app.get('/', (req, res) => {
-    res.render('homepage');
-});
 
-mongoose.connect('mongodb://localhost/vidly')
+
+mongoose.connect('mongodb://localhost/vidly', { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('connected to mongoDb'))
     .catch(err => console.error(err));
 
@@ -31,9 +31,10 @@ const movieSchema = new mongoose.Schema({
     comingSoon: Boolean
 });
 
+const Movie = mongoose.model('movie', movieSchema);
+
 async function createMovie() {
 
-    const Movie = mongoose.model('movie', movieSchema);
     const movie = new Movie({
         name: 'Mr and Mrs Smit',
         rate: 6.5,
@@ -45,4 +46,21 @@ async function createMovie() {
     console.log(result);
 }
 
-createMovie();
+//createMovie();
+
+async function getDocuments() {
+    const movies = await Movie.find();
+    console.log(movies);
+};
+
+async function getDocumentsOrderd() {
+    const movies = await Movie.find({ name: 'Spider Man' })
+        .sort({ name: 1 })
+        .limit(10)
+        .select({ name: 1, rate: 1 });
+
+    console.log(movies);
+}
+
+getDocumentsOrderd();
+
